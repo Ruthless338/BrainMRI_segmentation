@@ -22,7 +22,7 @@ if __name__ == '__main__':
         model.train()
         loss = 0
         for i in range(n):
-            MRI, mask = trainData.get(i)
+            MRI, mask = trainData.__getitem__(i)
             optimizer.zero_grad()
             output = model.forward(MRI)
             loss = criterion(output, mask)
@@ -35,7 +35,7 @@ if __name__ == '__main__':
     n = testData.__len__()
     with torch.no_grad():
         for i in range(n):
-            MRI, mask = testData.get(i)
+            MRI, mask = testData.__getitem__(i)
             output = model(MRI)
             loss = criterion(output, mask)
             print(f'i-th test image loss:{loss.item():.4f}')

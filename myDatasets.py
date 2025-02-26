@@ -36,7 +36,7 @@ class myDataset(Dataset):
                 raise FileNotFoundError(f"file {i} does not exists.")
 
     # 返回索引为id的核磁共振图像和标签掩膜图像
-    def get(self, id):
+    def __getitem__(self, id):
         MRI = Image.open(self.MRI[id]).convert('RGB').resize((512, 512))
         mask = Image.open(self.mask[id]).convert('L').resize((512, 512))
         to_tensor = transforms.ToTensor()
@@ -48,3 +48,23 @@ class myDataset(Dataset):
     def __len__(self):
         return len(self.MRI)
 
+    # batch是(image,target)这样的列表
+    # collate_fn把images和targets打包成两个批次张量
+    @staticmethod
+    def collate_fn(batch):
+        images, targets = list(zip(*batch))
+        batched_imgs = cat_list(images, fill_value=0)
+        batched_targets = cat_list(targets, fill_value=255)
+        return batched_imgs, batched_targets
+
+
+
+# 将多个不同大小的图片/张量 合成一个更高维度的数据结构（批次张量）
+def cat_list(images, fill_value=0):
+    # 计算该batch数据中，channel, h, w的最大值
+    max_size = tuple(max(s) for s in zip(*[img.shape for img in images]))
+    batch_shape = (len(images),) + max_size
+    batched_imgs = images[0].new(*batch_shape).fill_(fill_value)
+    for img, pad_img in zip(images, batched_imgs):
+        pad_img[..., :img.shape[-2], :img.shape[-1]].copy_(img)
+    return batched_imgs
