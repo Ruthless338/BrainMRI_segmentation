@@ -37,11 +37,12 @@ class myDataset(Dataset):
 
     # 返回索引为id的核磁共振图像和标签掩膜图像
     def __getitem__(self, id):
-        MRI = Image.open(self.MRI[id]).convert('RGB').resize((512, 512))
-        mask = Image.open(self.mask[id]).convert('L').resize((512, 512))
+        MRI = Image.open(self.MRI[id]).convert('RGB').resize((480, 480))
+        mask = Image.open(self.mask[id]).convert('L').resize((480, 480))
         to_tensor = transforms.ToTensor()
-        MRI = to_tensor(MRI).unsqueeze(0)
-        mask = to_tensor(mask).unsqueeze(0)
+        MRI = to_tensor(MRI)
+        mask = to_tensor(mask)  # 转换为张量后，掩膜图像的值范围是 [0, 1]
+        mask = (mask > 0.5).float()  # 将掩膜图像二值化
         return MRI, mask
 
     # 返回总的图片数
@@ -56,7 +57,6 @@ class myDataset(Dataset):
         batched_imgs = cat_list(images, fill_value=0)
         batched_targets = cat_list(targets, fill_value=255)
         return batched_imgs, batched_targets
-
 
 
 # 将多个不同大小的图片/张量 合成一个更高维度的数据结构（批次张量）

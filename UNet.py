@@ -3,15 +3,16 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 
-class DoubleConv(nn.Sequential):  # 最初的两个卷积层
+# 最初的两个卷积层
+class DoubleConv(nn.Sequential):
     def __init__(self, in_channels, out_channels, mid_channels=None):
         if mid_channels is None:
             mid_channels = out_channels
         super(DoubleConv, self).__init__(
-            nn.Conv2d(in_channels, mid_channels, kernel_size=3, padding=1, bias=False),
+            nn.Conv2d(in_channels, mid_channels, kernel_size=3, padding=1, stride=1, bias=False),
             nn.BatchNorm2d(mid_channels),  # 对每个通道分别计算均值和方差，并对通道内的每个像素值进行标准化
             nn.ReLU(inplace=True),
-            nn.Conv2d(mid_channels, out_channels, kernel_size=3, padding=1, bias=False),
+            nn.Conv2d(mid_channels, out_channels, kernel_size=3, padding=1, stride=1, bias=False),
             nn.BatchNorm2d(out_channels),
             nn.ReLU(inplace=True)
         )
@@ -26,19 +27,19 @@ class Down(nn.Sequential):  # 中间的四个下采样层，由一个最大池�
 
 
 class Up(nn.Module):
-    # 原论文使用的是转置卷积，bilinear表示使用双线性插值
+    # 转置卷积和双线性插值二选一进行上采样
     def __init__(self, in_channels, out_channels, bilinear=True):
         super(Up, self).__init__()
         if bilinear:
             self.up = nn.Upsample(scale_factor=2, mode='bilinear', align_corners=True)
             self.conv = DoubleConv(in_channels, out_channels, in_channels // 2)
         else:
-            self.up = nn.ConvTranspose2d(in_channels, in_channels // 2, kernel_size=2, stride=2)
+            self.up = nn.ConvTranspose2d(in_channels, in_channels // 2, kernel_size=2, stride=2, padding=0)
             self.conv = DoubleConv(in_channels, out_channels)
 
     def forward(self, x1: torch.Tensor, x2: torch.Tensor) -> torch.Tensor:
         x1 = self.up(x1)
-        # 保证对应层通道长和宽相等
+        # 保证上采样图x1和下采样图x2大小一致
         # [N, C, H, W]
         diff_y = x2.size()[2] - x1.size()[2]
         diff_x = x2.size()[3] - x1.size()[3]
@@ -59,6 +60,7 @@ class OutConv(nn.Sequential):
         )
 
 
+# 输入为480*480*3
 class UNet(nn.Module):
     def __init__(self,
                  in_channels: int = 3,
@@ -68,7 +70,6 @@ class UNet(nn.Module):
         super(UNet, self).__init__()
         self.in_channels = in_channels
         self.num_classes = num_classes
-        self.bilinear = bilinear
 
         self.in_conv = DoubleConv(in_channels, base_c)
         self.down1 = Down(base_c, base_c * 2)
