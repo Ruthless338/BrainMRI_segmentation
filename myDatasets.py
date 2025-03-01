@@ -2,6 +2,7 @@ import os
 from PIL import Image
 from torch.utils.data import Dataset
 from torchvision import transforms
+import torch
 
 
 # train共88个文件夹，test共23个文件夹，每个文件有20+组原图像+mask图像
@@ -15,7 +16,10 @@ class myDataset(Dataset):
         data_root = os.path.join(root, "MRI", self.flag)
         # 检查路径是否存在
         assert os.path.exists(data_root), f"path '{data_root}' does not exists."
-
+        self.transformer = transforms.Compose([
+            transforms.Resize((480,480)),
+            transforms.ToTensor()
+        ])
         # 递归遍历每个子文件夹，存储所有图片的路径
         self.MRI = []
         self.mask = []
@@ -28,20 +32,23 @@ class myDataset(Dataset):
                     MRI_path = os.path.join(folder_path, MRI_name)
                     mask_name = MRI_name.replace(".tif", "_mask.tif")
                     mask_path = os.path.join(folder_path, mask_name)
-                    self.MRI.append(MRI_path)
-                    self.mask.append(mask_path)
+                    if os.path.exists(mask_path):  # 检查掩膜图像路径是否存在
+                        self.MRI.append(MRI_path)
+                        self.mask.append(mask_path)
+                    else:
+                        print(f"Warning: file {mask_path} does not exists. Skipping {MRI_name}")
         # 检查掩膜图像路径是否都存在
-        for i in self.mask:
-            if os.path.exists(i) is False:
-                raise FileNotFoundError(f"file {i} does not exists.")
+        if len(self.MRI) != len(self.mask):
+            raise ValueError("The number of MRI images and mask images do not match.")
+
 
     # 返回索引为id的核磁共振图像和标签掩膜图像
     def __getitem__(self, id):
-        MRI = Image.open(self.MRI[id]).convert('RGB').resize((480, 480))
-        mask = Image.open(self.mask[id]).convert('L').resize((480, 480))
-        to_tensor = transforms.ToTensor()
-        MRI = to_tensor(MRI)
-        mask = to_tensor(mask)  # 转换为张量后，掩膜图像的值范围是 [0, 1]
+        MRI = Image.open(self.MRI[id])
+        mask = Image.open(self.mask[id])
+        MRI = self.transformer(MRI)
+        mask = self.transformer(mask)  # 转换为张量后，掩膜图像的值范围是 [0, 1]
+        # mask = torch.squeeze(mask).type(torch.long)
         mask = (mask > 0.5).float()  # 将掩膜图像二值化
         return MRI, mask
 
