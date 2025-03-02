@@ -17,7 +17,7 @@ class myDataset(Dataset):
         # 检查路径是否存在
         assert os.path.exists(data_root), f"path '{data_root}' does not exists."
         self.transformer = transforms.Compose([
-            transforms.Resize((480,480)),
+            transforms.Resize((480, 480)),
             transforms.ToTensor()
         ])
         # 递归遍历每个子文件夹，存储所有图片的路径
@@ -40,7 +40,6 @@ class myDataset(Dataset):
         # 检查掩膜图像路径是否都存在
         if len(self.MRI) != len(self.mask):
             raise ValueError("The number of MRI images and mask images do not match.")
-
 
     # 返回索引为id的核磁共振图像和标签掩膜图像
     def __getitem__(self, id):

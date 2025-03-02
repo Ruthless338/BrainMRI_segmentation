@@ -1,3 +1,5 @@
+import os.path
+
 from torch.utils.data import DataLoader
 from UNet import UNet
 import torch
@@ -30,19 +32,21 @@ def plot_images(original_img, true_mask, predicted_mask):
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 root = '/root/autodl-tmp/UNet'
 model = UNet(3, 2, True, 64).to(device)
-lr = 0.05
-max_iterations = 3
+lr = 0.0001
+max_iterations = 20
 optimizer = torch.optim.SGD(model.parameters(), lr)
 criterion = DiceLoss()  # diceLoss
-state_dict = torch.load("/root/autodl-tmp/state_dict.pth")
-model.load_state_dict(state_dict['model_state_dict'])
-optimizer.load_state_dict(state_dict['optimizer_state_dict'])
+pth = "/root/autodl-tmp/state_dict.pth"
+if os.path.exists(pth):
+    state_dict = torch.load(pth)
+    model.load_state_dict(state_dict['model_state_dict'])
+    optimizer.load_state_dict(state_dict['optimizer_state_dict'])
 
 
 if __name__ == '__main__':
     trainData = myDataset(root, True)
     n = trainData.__len__()
-    train_loader = DataLoader(trainData, batch_size=8, shuffle=True)
+    train_loader = DataLoader(trainData, batch_size=8, shuffle=True, collate_fn=myDataset.collate_fn)
     scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=10, gamma=0.1)
     # print(trainData.__len__())
 
@@ -61,7 +65,7 @@ if __name__ == '__main__':
             optimizer.step()
             total_loss += loss.item()
             cnt += 1
-            print(f'Epoch {epoch + 1}, {cnt}-th, Loss: {loss:.4f}')
+            # print(f'Epoch {epoch + 1}, {cnt}-th, Loss: {loss:.4f}')
             # if cnt % 10 == 0:  # 每10个batch可视化一次
             #     for i in range(MRI.size(0)):  # 遍历批次中的每个样本
             #         original_img = MRI[i]  # 原图
