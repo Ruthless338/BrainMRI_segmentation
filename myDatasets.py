@@ -3,6 +3,7 @@ from PIL import Image
 from torch.utils.data import Dataset
 from torchvision import transforms
 import torch
+from torchvision.transforms import ToTensor
 
 
 # train共88个文件夹，test共23个文件夹，每个文件有20+组原图像+mask图像
@@ -33,8 +34,13 @@ class myDataset(Dataset):
                     mask_name = MRI_name.replace(".tif", "_mask.tif")
                     mask_path = os.path.join(folder_path, mask_name)
                     if os.path.exists(mask_path):  # 检查掩膜图像路径是否存在
-                        self.MRI.append(MRI_path)
-                        self.mask.append(mask_path)
+                        mask = Image.open(mask_path)
+                        mask_tensor = ToTensor()(mask)
+                        if mask_tensor.sum() > 0:
+                            self.MRI.append(MRI_path)
+                            self.mask.append(mask_path)
+                        # self.MRI.append(MRI_path)
+                        # self.mask.append(mask_path)
                     else:
                         print(f"Warning: file {mask_path} does not exists. Skipping {MRI_name}")
         # 检查掩膜图像路径是否都存在

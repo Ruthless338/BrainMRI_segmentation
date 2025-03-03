@@ -30,11 +30,12 @@ def plot_images(original_img, true_mask, predicted_mask):
 
 # 超参数
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-root = '/root/autodl-tmp/UNet'
+# root = '/root/autodl-tmp/UNet'
+root = ''
 model = UNet(3, 2, True, 64).to(device)
-lr = 0.0001
+lr = 0.001
 max_iterations = 20
-optimizer = torch.optim.SGD(model.parameters(), lr)
+optimizer = torch.optim.Adam(model.parameters(), lr)
 criterion = DiceLoss()  # diceLoss
 pth = "/root/autodl-tmp/state_dict.pth"
 if os.path.exists(pth):
