@@ -1,6 +1,6 @@
 import torch
 import os
-from model import FCN_resnet50, FCNHead
+from model import FCN_resnet50
 from myDatasets import myDataset
 from torch.utils.data import DataLoader
 from diceLoss import DiceLoss
@@ -10,7 +10,7 @@ from torch.optim import lr_scheduler
 
 # 配置参数
 root = '../MRI'  # 替换为实际数据集路径
-num_classes = 2  # 根据数据集类别数修改
+num_classes = 1  # 根据数据集类别数修改
 batch_size = 8
 num_epochs = 50
 lr = 0.001

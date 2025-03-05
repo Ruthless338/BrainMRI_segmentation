@@ -41,7 +41,6 @@ if __name__ == '__main__':
             MRI, mask = MRI.to(device), mask.to(device)  # 确保数据移动到正确的设备
             optimizer.zero_grad()
             output = model(MRI)
-            output = torch.sigmoid(output)  # 如果使用 DiceLoss，通常需要对输出进行 sigmoid 激活
             loss = criterion(output.squeeze(1), mask.squeeze(1))
             loss.backward()
             optimizer.step()

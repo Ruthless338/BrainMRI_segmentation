@@ -16,7 +16,6 @@ def plot_images(original_img, true_mask, predicted_mask):
 
     plt.subplot(1, 3, 3)
     # plt.imshow(torch.argmax(predicted_mask.permute(1, 2, 0), axis=-1).cpu().numpy(), cmap='gray')
-    
     plt.imshow(predicted_mask.permute(1, 2, 0).cpu().numpy())
     plt.title('Predicted Mask')
     plt.axis('off')

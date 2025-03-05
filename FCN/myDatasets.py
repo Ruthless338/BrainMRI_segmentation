@@ -3,8 +3,7 @@ from PIL import Image
 from torch.utils.data import Dataset
 from torchvision import transforms
 import torch
-from torchvision.transforms  import ToTensor
-import numpy as np
+from torchvision.transforms  import ToTensor,RandomHorizontalFlip,RandomRotation,ColorJitter
 
 
 
@@ -21,6 +20,9 @@ class myDataset(Dataset):
         assert os.path.exists(data_root), f"path '{data_root}' does not exists."
         self.transformer = transforms.Compose([
             transforms.Resize((256, 256)),
+            RandomHorizontalFlip(p=0.5),
+            RandomRotation(degrees=15),
+            ColorJitter(brightness=0.2, contrast=0.2),
             transforms.ToTensor()
         ])
         # 递归遍历每个子文件夹，存储所有图片的路径

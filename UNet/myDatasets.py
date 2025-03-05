@@ -3,8 +3,7 @@ from PIL import Image
 from torch.utils.data import Dataset
 from torchvision import transforms
 import torch
-from torchvision.transforms  import ToTensor
-import numpy as np
+from torchvision.transforms  import ToTensor,RandomHorizontalFlip,RandomRotation,ColorJitter
 
 
 
@@ -16,11 +15,14 @@ class myDataset(Dataset):
     def __init__(self, root: str, train: bool):
         super(Dataset, self).__init__()
         self.flag = "train" if train else "test"
-        data_root = os.path.join(root, "MRI", self.flag)
+        data_root = os.path.join(root, self.flag)
         # 检查路径是否存在
         assert os.path.exists(data_root), f"path '{data_root}' does not exists."
         self.transformer = transforms.Compose([
             transforms.Resize((256, 256)),
+            RandomHorizontalFlip(p=0.5),
+            RandomRotation(degrees=15),
+            ColorJitter(brightness=0.2, contrast=0.2),
             transforms.ToTensor()
         ])
         # 递归遍历每个子文件夹，存储所有图片的路径
@@ -38,11 +40,11 @@ class myDataset(Dataset):
                     if os.path.exists(mask_path):  # 检查掩膜图像路径是否存在
                         mask = Image.open(mask_path)
                         mask_tensor = ToTensor()(mask)
-                        if mask_tensor.sum() > 0:
-                            self.MRI.append(MRI_path)
-                            self.mask.append(mask_path)
-                        # self.MRI.append(MRI_path)
-                        # self.mask.append(mask_path)
+                        # if mask_tensor.sum() > 0:
+                        #     self.MRI.append(MRI_path)
+                        #     self.mask.append(mask_path)
+                        self.MRI.append(MRI_path)
+                        self.mask.append(mask_path)
                     else:
                         print(f"Warning: file {mask_path} does not exists. Skipping {MRI_name}")
         # 检查掩膜图像路径是否都存在
