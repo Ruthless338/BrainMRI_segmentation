@@ -18,8 +18,6 @@ momentum = 0.9
 weight_decay = 1e-4
 pretrain_backbone = False  # 是否使用预训练骨干网络
 aux = True  # 是否使用辅助分类器
-checkpoint_dir = './checkpoints'
-os.makedirs(checkpoint_dir, exist_ok=True)
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
@@ -53,6 +51,7 @@ if __name__ == '__main__':
             optimizer.zero_grad()
             outputs = model(MRI)
             main_out = outputs["out"]
+            main_out = torch.sigmoid(main_out)
             # 计算主损失
             dice_loss = criterion(main_out, masks)
             ce_loss = ce_criterion(main_out, masks)
@@ -60,6 +59,7 @@ if __name__ == '__main__':
             # 如果使用辅助分类器
             if aux:
                 aux_out = outputs["aux"]
+                aux_out = torch.sigmoid(aux_out)
                 aux_dice = criterion(aux_out, masks)
                 aux_ce = ce_criterion(aux_out, masks)
                 loss += 0.5 * (aux_dice + aux_ce)
