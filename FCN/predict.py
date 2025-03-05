@@ -10,7 +10,7 @@ model = FCN_resnet50(True, 1, False).to(device)
 optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
 current_dir = os.path.dirname(__file__)
 root = "c:/Users/陈毅彪/source/repos/py/BrainMRI_segmentaion/MRI"
-pth = os.path.join(current_dir, 'state_dict_1_50')
+pth = os.path.join(current_dir, 'state_dict_1_40')
 state_dict = torch.load(pth, map_location=torch.device('cpu'))
 optimizer.load_state_dict(state_dict['optimizer_state_dict'])
 model.load_state_dict(state_dict['model_state_dict'])

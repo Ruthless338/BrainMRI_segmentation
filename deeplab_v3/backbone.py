@@ -1,7 +1,5 @@
 '''
-backbone有ResNet和mobileNet两种网络
-ResNet50，ResNet101
-
+backbone:ResNet50和ResNet101
 '''
 
 import torch

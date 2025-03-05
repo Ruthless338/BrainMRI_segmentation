@@ -1,3 +1,14 @@
+'''
+DeepLabV3模型的实现
+1. ASPP模块
+2. DeepLabV3模型
+3. FCNHead模块
+4. IntermediateLayerGetter模块
+5. DeepLabHead模块
+6. deeplabv3_resnet101函数
+7. DeepLabV3_ResNet50函数
+'''
+
 from collections import OrderedDict
 import torch
 from torch import nn, Tensor

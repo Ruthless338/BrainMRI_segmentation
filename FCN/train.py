@@ -9,7 +9,7 @@ import torch.optim as optim
 from torch.optim import lr_scheduler
 
 # 配置参数
-root = '../MRI'  # 替换为实际数据集路径
+root = '/root/autodl-tmp/UNet/MRI'  # 替换为实际数据集路径
 num_classes = 1  # 根据数据集类别数修改
 batch_size = 8
 num_epochs = 50
@@ -34,11 +34,9 @@ test_loader = DataLoader(test_data, batch_size=1, shuffle=False, num_workers=4)
 
 # 损失函数和优化器
 criterion = DiceLoss()
-ce_criterion = torch.nn.CrossEntropyLoss()  # 组合Dice Loss和交叉熵
+# ce_criterion = torch.nn.CrossEntropyLoss()  # 组合Dice Loss和交叉熵
 optimizer = optim.Adam(model.parameters(), lr=lr, weight_decay=weight_decay)
 scheduler = lr_scheduler.StepLR(optimizer, step_size=10, gamma=0.1)  # 学习率调度
-
-best_miou = 0.0
 
 # 训练循环
 if __name__ == '__main__':
@@ -51,18 +49,18 @@ if __name__ == '__main__':
             optimizer.zero_grad()
             outputs = model(MRI)
             main_out = outputs["out"]
-            main_out = torch.sigmoid(main_out)
             # 计算主损失
             dice_loss = criterion(main_out, masks)
-            ce_loss = ce_criterion(main_out, masks)
-            loss = dice_loss + ce_loss
+            # ce_loss = ce_criterion(main_out, masks)
+            # loss = dice_loss + ce_loss
+            loss = dice_loss
             # 如果使用辅助分类器
             if aux:
                 aux_out = outputs["aux"]
-                aux_out = torch.sigmoid(aux_out)
                 aux_dice = criterion(aux_out, masks)
-                aux_ce = ce_criterion(aux_out, masks)
-                loss += 0.5 * (aux_dice + aux_ce)
+                # aux_ce = ce_criterion(aux_out, masks)
+                # loss += 0.5 * (aux_dice + aux_ce)
+                loss += 0.5 * aux_dice
             loss.backward()
             optimizer.step()
             total_loss += loss.item()

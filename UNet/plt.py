@@ -1,5 +1,4 @@
 import matplotlib.pyplot as plt
-import torch
 
 def plot_images(original_img, true_mask, predicted_mask):
     plt.figure(figsize=(15, 5))

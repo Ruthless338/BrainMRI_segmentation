@@ -5,6 +5,7 @@ from torch.utils.data import DataLoader
 from plt import plot_images
 import os
 
+
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 # model = UNet(3, 2, True).to(device)
 model = UNet(3, 1, True).to(device)

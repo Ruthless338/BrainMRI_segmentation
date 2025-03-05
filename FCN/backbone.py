@@ -1,6 +1,5 @@
 '''
 backbone由resnet50和resnet101组成
-
 '''
 
 import torch

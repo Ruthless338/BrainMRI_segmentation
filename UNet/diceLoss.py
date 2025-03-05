@@ -9,10 +9,7 @@ class DiceLoss(nn.Module):
     def forward(self, preds, targets):
         # preds: [batch_size, num_classes, height, width]
         # targets: [batch_size, num_classes, height, width]
-        if self.num_classes > 1:
-            preds = torch.softmax(preds, dim=1)
-        else :
-            preds = torch.sigmoid(preds)
+        preds = torch.sigmoid(preds)
 
         intersection = torch.sum(preds * targets)  # 计算交集
         union = torch.sum(preds) + torch.sum(targets)  # 计算并集
