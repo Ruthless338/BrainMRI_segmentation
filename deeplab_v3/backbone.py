@@ -13,7 +13,7 @@ def conv3x3(in_channels, out_channels, stride=1, groups=1, dilation=1):
 
 
 def conv1x1(in_channels, out_channels, stride=1):
-    return nn.Conv2d(in_channels, out_channels, stride=stride)
+    return nn.Conv2d(in_channels, out_channels, kernel_size=1, stride=stride)
 
 
 class Bottleneck(nn.Module):

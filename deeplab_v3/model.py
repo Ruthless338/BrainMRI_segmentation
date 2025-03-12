@@ -109,7 +109,7 @@ class ASPPPooling(nn.Sequential):
 
 
 class ASPP(nn.Module):
-    def __init__(self, in_channels, atrous_rates, out_channels):
+    def __init__(self, in_channels, atrous_rates, out_channels = 256):
         super(ASPP, self).__init__()
         modules = [
             nn.Sequential(
@@ -118,7 +118,7 @@ class ASPP(nn.Module):
                 nn.ReLU()
             )
         ]
-
+        # 若干个ASPP的卷积层之后，还有一个ASPPPooling层（该层直接处理最初的输入）
         rates = tuple(atrous_rates)
         for rate in rates:
             modules.append(ASPPConv(in_channels, out_channels, rate))
@@ -153,7 +153,7 @@ class DeepLabHead(nn.Sequential):
 
 
 def DeepLabV3_ResNet50(aux, num_classes, pretrain_backbone=False):
-    backbone = resnet50(replace_stride_with_dilation=[])
+    backbone = resnet50(replace_stride_with_dilation=[False, True, True])
 
     if pretrain_backbone:
         state_dict = torch.load("resnet50.pth", map_location='cpu')
@@ -175,7 +175,7 @@ def DeepLabV3_ResNet50(aux, num_classes, pretrain_backbone=False):
     return model
 
 
-def deeplabv3_resnet101(aux, num_classes=21, pretrain_backbone=False):
+def DeepLabV3_ResNet101(aux, num_classes, pretrain_backbone=False):
     backbone = resnet101(replace_stride_with_dilation=[False, True, True])
 
     if pretrain_backbone:

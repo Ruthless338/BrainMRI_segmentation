@@ -11,7 +11,7 @@ from plt import plot_images
 
 # 超参数
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-# root = '/root/autodl-tmp/UNet'
+# root = '/root/autodl-tmp/BrainMRI_segmentation/MRI'
 root = ''
 model = UNet(3, 1, True, 64).to(device)   # 注意单通道输出即可
 lr = 0.001
